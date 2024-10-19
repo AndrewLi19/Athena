@@ -97,7 +97,7 @@ void MX_USART1_UART_Init(void)
 
   /* USER CODE BEGIN USART1_Init 1 */
   LL_DMA_EnableIT_TC(DMA2, LL_DMA_CHANNEL_7);
-  LL_USART_EnableIT_RXNE(USART1); // 使能接收缓冲区非空中断
+  LL_USART_EnableIT_RXNE(USART1); // 使能接收缓冲区非空中�?
 
   /* USER CODE END USART1_Init 1 */
   USART_InitStruct.BaudRate = 115200;
