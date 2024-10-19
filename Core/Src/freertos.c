@@ -34,6 +34,7 @@
 #include "calibration.h"
 #include "w25q64_ll.h"
 #include "uart_receive.h"
+#include "stm32l4xx_ll_pwr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -138,47 +139,9 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
-//	for(;;)
-//	{
-//	  if (xSemaphoreTake(UartRxReady, 0) == pdPASS) {
-//		  while (index < 6 && xQueueReceive(UartRxQueue, &Pos[index], 0) == pdPASS) {
-//			  if(Pos[index]!=0){
-//				  LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
-//				  LL_mDelay(100);
-//				  index++;
-//			  }
-//		  }
-//		  if(index ==6)
-//		  {
-//			  UART_DMA_Transmit(Pos, 6);
-//			  index=0;
-//		  }
-//	  }
-//	  else{
-//		  BSP_W25Qx_Init();
-//	  }
-//	  BSP_W25Qx_Init();
-//	  uint8_t ID[2]={0};
-//	  BSP_W25Qx_Read_ID(ID);
-//	  //BSP_W25Qx_Erase_Chip();
-//	  BSP_W25Qx_Erase_Block(0x123456);
-//	  uint8_t tx_data[128] = {0xef};
-//	  uint8_t rx_data[128] = {0x00};
-//	  BSP_W25Qx_Write(tx_data, 0x123456, 128);
-//	  BSP_W25Qx_Read(rx_data, 0x123456, 4);
-//	  BSP_W25Qx_Erase_Block(0x123456);
-//	  BSP_W25Qx_Read(rx_data, 0x123456, 4);
-//
-//	  uint8_t ID[4];
-//	  I2C_expander_initialize();
-//	  initialize_sensors_I2C(&vl53l5dev_f,1);
-//	  vl53l5cx_start_ranging(&vl53l5dev_f);
-//	  while(1){
-//		  LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
-//	  	  LL_mDelay(100);
-//	  	  get_sensor_data(&vl53l5dev_f, &vl53l5_res_f);
-//	  }
-//  }
+	for(;;)
+	{
+    }
   /* USER CODE END StartDefaultTask */
 }
 

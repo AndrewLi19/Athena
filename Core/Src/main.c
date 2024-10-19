@@ -120,7 +120,7 @@ int main(void)
   MX_FREERTOS_Init();
 
   /* Start scheduler */
-  osKernelStart();
+//  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -129,6 +129,20 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+		SCB->SCR &= ~(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
+		for(int i=0;i<10;i++)
+		{
+			LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
+			LL_mDelay(400);
+		}
+		__asm volatile( "dsb" ::: "memory" );
+		__asm volatile( "wfi" );
+		__asm volatile( "isb" );
+		for(int i=0;i<10;i++)
+		{
+			LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
+			LL_mDelay(200);
+		}
 
     /* USER CODE BEGIN 3 */
   }
