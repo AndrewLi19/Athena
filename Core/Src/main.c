@@ -141,20 +141,7 @@ int main(void)
 	  		LL_mDelay(200);
 	  	}
 	  	/* USER CODE BEGIN 3 */
-	  }  /* USER CODE END 3 */
-
-	  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1) != RESET)
-	  {
-	    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
-	    /* USER CODE BEGIN LL_EXTI_LINE_1 */
-	  	for(int i=0;i<10;i++)
-	  	{
-	  		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
-	  		LL_mDelay(400);
-	  	}
-	    /* USER CODE END LL_EXTI_LINE_1 */
-	  }
-    /* USER CODE BEGIN 3 */
+   }
   /* USER CODE END 3 */
 }
 
