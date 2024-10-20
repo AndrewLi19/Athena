@@ -197,7 +197,11 @@ void EXTI1_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
     /* USER CODE BEGIN LL_EXTI_LINE_1 */
-//    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
+  	for(int i=0;i<10;i++)
+  	{
+  		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
+  		LL_mDelay(400);
+  	}
     /* USER CODE END LL_EXTI_LINE_1 */
   }
   /* USER CODE BEGIN EXTI1_IRQn 1 */

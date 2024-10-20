@@ -129,23 +129,32 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		SCB->SCR &= ~(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
-		for(int i=0;i<10;i++)
-		{
-			LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
-			LL_mDelay(400);
-		}
-		__asm volatile( "dsb" ::: "memory" );
-		__asm volatile( "wfi" );
-		__asm volatile( "isb" );
-		for(int i=0;i<10;i++)
-		{
-			LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
-			LL_mDelay(200);
-		}
+	  	/* USER CODE END WHILE */
+	  	SCB->SCR &= ~(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
+	  	LL_mDelay(200);
+	  	__asm volatile( "dsb" ::: "memory" );
+	  	__asm volatile( "wfi" );
+	  	__asm volatile( "isb" );
+	  	for(int i=0;i<10;i++)
+	  	{
+	  		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
+	  		LL_mDelay(200);
+	  	}
+	  	/* USER CODE BEGIN 3 */
+	  }  /* USER CODE END 3 */
 
+	  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1) != RESET)
+	  {
+	    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
+	    /* USER CODE BEGIN LL_EXTI_LINE_1 */
+	  	for(int i=0;i<10;i++)
+	  	{
+	  		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_9);
+	  		LL_mDelay(400);
+	  	}
+	    /* USER CODE END LL_EXTI_LINE_1 */
+	  }
     /* USER CODE BEGIN 3 */
-  }
   /* USER CODE END 3 */
 }
 
