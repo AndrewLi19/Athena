@@ -3200,6 +3200,7 @@ BaseType_t xReturn;
 	}
 
 	return xReturn;
+
 }
 /*-----------------------------------------------------------*/
 
@@ -3663,6 +3664,7 @@ static void prvCheckTasksWaitingTermination( void )
 		}
 	}
 	#endif /* INCLUDE_vTaskDelete */
+
 }
 /*-----------------------------------------------------------*/
 

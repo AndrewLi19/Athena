@@ -30,13 +30,15 @@
 #include "cmsis_os.h"
 #include "uart_receive.h"
 #include "stm32l4xx_ll_gpio.h"
+#include "arbitration_fram.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
- extern osThreadId_t uwbISRTaskHandle;
- extern SemaphoreHandle_t spiDeckTxComplete;
- extern SemaphoreHandle_t spiDeckRxComplete;
+extern osThreadId_t uwbISRTaskHandle;
+extern SemaphoreHandle_t spiDeckTxComplete;
+extern SemaphoreHandle_t spiDeckRxComplete;
 
 /* USER CODE END TD */
 
@@ -343,6 +345,29 @@ void USART1_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles USART2 global interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    uint8_t received_data;
+
+    if (LL_USART_IsActiveFlag_RXNE(USART2)) {
+        received_data = LL_USART_ReceiveData8(USART2);
+        if (UART2RxQueue) {
+            xQueueSendFromISR(UART2RxQueue, &received_data, &xHigherPriorityTaskWoken);
+        }
+    }
+    if (LL_USART_IsActiveFlag_IDLE(USART2)) {
+        LL_USART_ClearFlag_IDLE(USART2);
+        if (uartReadySemaphore != NULL) {
+            xSemaphoreGiveFromISR(uartReadySemaphore, &xHigherPriorityTaskWoken);
+        }
+    }
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+/**
   * @brief This function handles USART3 global interrupt.
   */
 void USART3_IRQHandler(void)
@@ -393,6 +418,26 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
   /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
+/*
+ * @brief This function handles FRAM EMERGENCY interrupt
+ * */
+void EXTI1_IRQHandler(void)
+{
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1) != RESET)
+    {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
+        portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+        if(FramSwitchMutex){
+        	LL_GPIO_SetOutputPin(TMUX_SEL_Port, TMUX_SEL_Pin);
+        	if (xSemaphoreTakeFromISR(FramSwitchMutex, &xHigherPriorityTaskWoken) == pdTRUE){
+        		LL_mDelay(MAX_LOCK_TIME);
+        	}
+        	xSemaphoreGiveFromISR(FramSwitchMutex, &xHigherPriorityTaskWoken);
+        }
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
 }
 
 /**
@@ -455,7 +500,13 @@ void DMA2_Channel2_IRQHandler(void)
 void DMA2_Channel3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Channel3_IRQn 0 */
-
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		if (LL_DMA_IsActiveFlag_TC3(DMA2)){
+			LL_DMA_ClearFlag_TC3(DMA2);
+			LL_SPI_DisableDMAReq_RX(SPI1);
+			LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_3);
+			xSemaphoreGiveFromISR(spi1rxComplete, &xHigherPriorityTaskWoken);
+		}
   /* USER CODE END DMA2_Channel3_IRQn 0 */
 
   /* USER CODE BEGIN DMA2_Channel3_IRQn 1 */
@@ -469,7 +520,14 @@ void DMA2_Channel3_IRQHandler(void)
 void DMA2_Channel4_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Channel4_IRQn 0 */
-
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		if (LL_DMA_IsActiveFlag_TC4(DMA2))
+		{
+			LL_DMA_ClearFlag_TC4(DMA2);
+			LL_SPI_DisableDMAReq_TX(SPI1);
+			LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_4);
+			xSemaphoreGiveFromISR(spi1txComplete, &xHigherPriorityTaskWoken);
+		}
   /* USER CODE END DMA2_Channel4_IRQn 0 */
 
   /* USER CODE BEGIN DMA2_Channel4_IRQn 1 */

@@ -11,6 +11,11 @@
 #include "stm32l4xx_ll_dma.h"
 #include "stm32l4xx_ll_spi.h"
 #include "stm32l4xx_ll_bus.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
+#include "semphr.h"
 
 /*
   1. SPI3
@@ -48,7 +53,35 @@ bool spiExchange(SPI_TypeDef* SPIx, size_t length, const uint8_t * data_tx, uint
     return result;
 }
 
+bool spi1Exchange(SPI_TypeDef* SPIx, size_t length, const uint8_t * data_tx, uint8_t * data_rx)
+{
+	// DMA already configured, just need to set memory addresses
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_4, (uint32_t)data_tx, LL_SPI_DMA_GetRegAddr(SPIx), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_4, length);
 
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_3, LL_SPI_DMA_GetRegAddr(SPIx), (uint32_t)data_rx, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_3, length);
+
+    // Enable DMA Streams
+    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_4);
+    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_3);
+
+    // Enable SPI DMA requests
+    LL_SPI_EnableDMAReq_TX(SPIx);
+    LL_SPI_EnableDMAReq_RX(SPIx);
+
+    // Enable peripheral
+    LL_SPI_Enable(SPIx);
+
+
+    // Wait for completion
+    bool result = (xSemaphoreTake(spi1txComplete, portMAX_DELAY) == pdTRUE)
+             && (xSemaphoreTake(spi1rxComplete, portMAX_DELAY) == pdTRUE);
+
+    // Disable peripheral
+    LL_SPI_Disable(SPIx);
+    return result;
+}
 
 void spiBeginTransaction()
 {
@@ -60,4 +93,16 @@ void spiEndTransaction()
 {
 	xSemaphoreGive(spiMutex);
 }
+
+void spi1BeginTransaction()
+{
+	xSemaphoreTake(spi1Mutex, portMAX_DELAY);
+
+}
+
+void spi1EndTransaction()
+{
+	xSemaphoreGive(spi1Mutex);
+}
+
 
